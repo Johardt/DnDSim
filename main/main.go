@@ -8,5 +8,7 @@ import (
 
 func main() {
 	http.Handle("/", templ.Handler(indexPage()))
+	http.Handle("/register", templ.Handler(registerPage()))
+	
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

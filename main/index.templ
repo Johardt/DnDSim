@@ -1,13 +1,26 @@
 package main
 
 templ indexPage() {
-    <html lang="en-US">
-        <head>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <title>DnD</title>
-        </head>
-        <body>
-            <h1>Welcome to the Dungeon!</h1>
-        </body>
-    </html>
+	<!DOCTYPE html>
+	<html lang="en-US">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<script src="https://cdn.tailwindcss.com"></script>
+			<script src="https://unpkg.com/htmx.org@2.0.2"></script>
+			<title>DnD</title>
+		</head>
+		@indexBody()
+	</html>
+}
+
+templ indexBody() {
+	<body class="bg-gray-200 flex flex-col justify-center items-center min-h-screen">
+		<h1 class="text-4xl font-bold m-2 mb-8 text-gray-800">Welcome to the dungeon!</h1>
+		<br/>
+		<section class="flex flex-row">
+			<button hx-get="/login" hx-target="body" class="bg-green-500 rounded-md m-2 p-2">Log in</button>
+			<button hx-get="/register" hx-target="body" class="bg-green-500 rounded-md m-2 p-2">Register</button>
+		</section>
+	</body>
 }
