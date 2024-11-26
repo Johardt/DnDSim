@@ -1,1 +1,0 @@
-<main><h1>Nothing to see here...</h1><button hx-get=\"/\" hx-target=\"body\" class=\"bg-green-500 rounded-md p-2 m-2\">Return to main page</button></main>

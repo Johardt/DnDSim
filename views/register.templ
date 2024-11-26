@@ -1,0 +1,40 @@
+package views
+
+templ RegisterPage() {
+	@basePage() {
+		<section>
+			<form hx-post="/users">
+				@UserInputField("Email Address", "email", "")
+				@UserInputField("Password", "password", "")
+				<button type="submit" class="bg-blue-500 rounded-md p-2 m-2">
+					Register
+				</button>
+			</form>
+		</section>
+		<section>
+			<button hx-get="/" hx-target="body" hx-push-url="true" class="bg-green-500 rounded-md p-2 m-2">
+				Return to main page
+			</button>
+		</section>
+	}
+}
+
+templ UserInputField(label, name, err string) {
+	<div hx-target="this" hx-swap="outerHTML">
+		<label>{ label }</label>
+		<input type="text" name={ name } required hx-post={ "/users/" + name }/>
+		if err != "" {
+			<p class="text-red-500">{ err }</p>
+		}
+	</div>
+}
+
+templ UserPasswordField(value, err string) {
+	<div hx-target="this" hx-swap="outerHTML">
+		<label>Password</label>
+		<input type="password" name="password" value={ value } required hx-post="/users/password"/>
+		if err != "" {
+			<p class="text-red-500">{ err }</p>
+		}
+	</div>
+}
