@@ -4,15 +4,16 @@ templ RegisterPage() {
 	@basePage() {
 		<section>
 			<form hx-post="/users">
-				@UserInputField("Email Address", "email", "")
-				@UserInputField("Password", "password", "")
-				<button type="submit" class="bg-blue-500 rounded-md p-2 m-2">
+				<label class="flex-row">Email Address</label>
+				@UserInputField("email", "", "")
+				@UserPasswordField("", "")
+				<button type="submit" class="p-2 m-2 bg-blue-500 rounded-md">
 					Register
 				</button>
 			</form>
 		</section>
 		<section>
-			<button hx-get="/" hx-target="body" hx-push-url="true" class="bg-green-500 rounded-md p-2 m-2">
+			<button hx-get="/" hx-target="body" hx-push-url="true" class="p-2 m-2 bg-green-500 rounded-md">
 				Return to main page
 			</button>
 		</section>
