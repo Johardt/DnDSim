@@ -4,31 +4,72 @@ import (
 	"DnDSim/views"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func RegisterUserRoutes() {
+	http.HandleFunc("/users", handleUserCreation)
+
 	http.HandleFunc("/users/email", handleUserEmail)
 	http.HandleFunc("/users/password", handleUserPassword)
 }
 
+func handleUserCreation(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		email := r.FormValue("email")
+		password := r.FormValue("password")
+		if isValidEmail(email) && isValidPassword(password) {
+			w.Write([]byte("User created successfully!"))
+			return
+		} else {
+			http.Error(w, "Invalid email or password", http.StatusUnprocessableEntity)
+		}
+	}
+}
+
 func handleUserEmail(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Email: %s\n", r.FormValue("email"))
+	email := r.FormValue("email")
+
+	if !isValidEmail(email) {
+		log.Printf("Invalid email address provided: %s\n", email)
+		views.UserInputField(
+			"email",
+			email,
+			"Invalid email address provided.",
+		).Render(r.Context(), w)
+		return
+	}
 
 	views.UserInputField(
-		"Email Address",
+		"email",
 		r.FormValue("email"),
-		"Invalid email address provided.",
+		"",
 	).Render(r.Context(), w)
+}
+
+func isValidEmail(email string) bool {
+	if strings.Count(email, "@") != 1 {
+		return false
+	}
+
+	return true
 }
 
 func handleUserPassword(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
-	// Validate password length
-	if len(password) < 8 {
+	if !isValidPassword(password) {
 		views.UserPasswordField(password, "Password too short! Minimum 8 characters.").Render(r.Context(), w)
 		return
 	}
 
 	views.UserPasswordField(password, "").Render(r.Context(), w)
+}
+
+func isValidPassword(password string) bool {
+	if len(password) < 8 {
+		return false
+	}
+
+	return true
 }

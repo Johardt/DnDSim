@@ -20,10 +20,9 @@ templ RegisterPage() {
 	}
 }
 
-templ UserInputField(label, name, err string) {
-	<div hx-target="this" hx-swap="outerHTML">
-		<label>{ label }</label>
-		<input type="text" name={ name } required hx-post={ "/users/" + name }/>
+templ UserInputField(name, value, err string) {
+	<div class="flex-row" hx-target="this" hx-swap="outerHTML">
+		<input type="text" name={ name } value={ value } required hx-post={ "/users/" + name }/>
 		if err != "" {
 			<p class="text-red-500">{ err }</p>
 		}
