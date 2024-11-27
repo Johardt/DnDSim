@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func RegisterUserRoutes() {
@@ -70,4 +72,17 @@ func isValidPassword(password string) bool {
 	re := regexp.MustCompile(regexPattern)
 
 	return re.MatchString(password)
+}
+
+func hashPassword(password string) (string, error) {
+	// hash password
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err;
+	}
+	return string(hash), nil
+}
+
+func verifyPassword(password, hash string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 }
