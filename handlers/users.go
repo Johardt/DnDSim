@@ -4,7 +4,7 @@ import (
 	"DnDSim/views"
 	"log"
 	"net/http"
-	"strings"
+	"regexp"
 )
 
 func RegisterUserRoutes() {
@@ -48,18 +48,17 @@ func handleUserEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func isValidEmail(email string) bool {
-	if strings.Count(email, "@") != 1 {
-		return false
-	}
-
-	return true
+	validDomains := `com|org|net|de|nl`
+	regexPattern := `^[^@]+@[^@.]+\.(` + validDomains + `)$`
+	re := regexp.MustCompile(regexPattern)
+	return re.MatchString(email)
 }
 
 func handleUserPassword(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if !isValidPassword(password) {
-		views.UserPasswordField(password, "Password too short! Minimum 8 characters.").Render(r.Context(), w)
+		views.UserPasswordField(password, "Password too short! Minimum 12 characters.").Render(r.Context(), w)
 		return
 	}
 
@@ -67,9 +66,8 @@ func handleUserPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func isValidPassword(password string) bool {
-	if len(password) < 8 {
-		return false
-	}
+	regexPattern := `^.{12,}$`
+	re := regexp.MustCompile(regexPattern)
 
-	return true
+	return re.MatchString(password)
 }
