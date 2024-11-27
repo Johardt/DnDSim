@@ -2,16 +2,15 @@ package views
 
 templ RegisterPage() {
 	@basePage() {
-		<section>
-			<form hx-post="/users">
-				<label class="flex-row">Email Address</label>
-				@UserInputField("email", "", "")
-				@UserPasswordField("", "")
-				<button type="submit" class="p-2 m-2 bg-blue-500 rounded-md">
-					Register
-				</button>
-			</form>
-		</section>
+		<form hx-post="/users">
+			<label>Email Address</label>
+			@UserInputField("email", "", "")
+			<label>Password</label>
+			@UserPasswordField("", "")
+			<button type="submit" class="p-2 m-2 bg-blue-500 rounded-md">
+				Register
+			</button>
+		</form>
 		<section>
 			<button hx-get="/" hx-target="body" hx-push-url="true" class="p-2 m-2 bg-green-500 rounded-md">
 				Return to main page
@@ -21,7 +20,7 @@ templ RegisterPage() {
 }
 
 templ UserInputField(name, value, err string) {
-	<div class="flex-row" hx-target="this" hx-swap="outerHTML">
+	<div hx-target="this" hx-swap="outerHTML">
 		<input type="text" name={ name } value={ value } required hx-post={ "/users/" + name }/>
 		if err != "" {
 			<p class="text-red-500">{ err }</p>
@@ -31,7 +30,6 @@ templ UserInputField(name, value, err string) {
 
 templ UserPasswordField(value, err string) {
 	<div hx-target="this" hx-swap="outerHTML">
-		<label>Password</label>
 		<input type="password" name="password" value={ value } required hx-post="/users/password"/>
 		if err != "" {
 			<p class="text-red-500">{ err }</p>
