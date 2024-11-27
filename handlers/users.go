@@ -10,19 +10,18 @@ import (
 )
 
 func RegisterUserRoutes() {
-	http.HandleFunc("/users", handleUserCreation)
+	http.HandleFunc("/users", handleUser)
 
 	http.HandleFunc("/users/email", handleUserEmail)
 	http.HandleFunc("/users/password", handleUserPassword)
 }
 
-func handleUserCreation(w http.ResponseWriter, r *http.Request) {
+func handleUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
 		if isValidEmail(email) && isValidPassword(password) {
 			w.Write([]byte("User created successfully!"))
-			return
 		} else {
 			http.Error(w, "Invalid email or password", http.StatusUnprocessableEntity)
 		}
@@ -75,10 +74,9 @@ func isValidPassword(password string) bool {
 }
 
 func hashPassword(password string) (string, error) {
-	// hash password
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", err;
+		return "", err
 	}
 	return string(hash), nil
 }
