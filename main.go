@@ -1,6 +1,7 @@
 package main
 
 import (
+	"DnDSim/db"
 	"DnDSim/handlers"
 	"DnDSim/views"
 	"log"
@@ -10,7 +11,10 @@ import (
 )
 
 func main() {
-	http.Handle("/", templ.Handler(views.IndexPage()))
+	db.InitializeDB("users.db")
+	defer db.CloseDB()
+
+	http.Handle("/", templ.Handler(views.BasePage()))
 	http.Handle("/register", templ.Handler(views.RegisterPage()))
 
 	handlers.RegisterUserRoutes()
