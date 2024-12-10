@@ -30,12 +30,12 @@ templ BasePage() {
 			<!-- Header Section -->
 			<header class="w-full py-6 bg-transparent">
 				<div class="container mx-auto flex justify-between items-center px-4">
-					<a href="/" class="text-2xl font-extrabold tracking-wide">DnD Dungeon</a>
+					<button hx-get="/" hx-target="body" hx-swap="outerHTML" class="text-2xl font-extrabold tracking-wide">DnD Dungeon</button>
 				</div>
 			</header>
 			<!-- Main Content -->
 			<main id="content" class="flex-grow container mx-auto px-4 py-8">
-				@indexPage()
+				@IndexPage()
 			</main>
 			<!-- Footer Section -->
 			<footer class="w-full py-4 bg-transparent">
@@ -47,7 +47,7 @@ templ BasePage() {
 	</html>
 }
 
-templ indexPage() {
+templ IndexPage() {
 	<div class="text-center">
 		<h1 class="text-5xl font-extrabold mb-6 animate-fadeIn">Welcome to the Dungeon</h1>
 		<p class="text-lg mb-12 animate-fadeIn">Embark on your epic journey. Log in or register to begin your adventure.</p>

@@ -15,6 +15,7 @@ func main() {
 	defer db.CloseDB()
 
 	http.Handle("/", templ.Handler(views.BasePage()))
+	http.Handle("/index", templ.Handler(views.IndexPage()))
 	http.Handle("/register", templ.Handler(views.RegisterPage()))
 
 	handlers.RegisterUserRoutes()
