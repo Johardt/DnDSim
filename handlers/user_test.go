@@ -49,18 +49,18 @@ func TestHashPassword(t *testing.T) {
 		{"password"},
 	}
 	for _, test := range tests {
-		hashed, err := hashPassword(test.password)
+		hashed, err := HashPassword(test.password)
 		if err != nil {
 			t.Errorf("Error hashing password: %v", err)
 		}
 		if len(hashed) == 0 {
 			t.Errorf("Expected hashed password, but got empty string")
 		}
-		hashed2, _ := hashPassword(test.password)
+		hashed2, _ := HashPassword(test.password)
 		if hashed == hashed2 {
 			t.Errorf("Expected different hashes for different passwords, but got the same hash")
 		}
-		hashed3, _ := hashPassword("test password")
+		hashed3, _ := HashPassword("test password")
 		if hashed == hashed3 {
 			t.Errorf("Expected different hashes for different passwords, but got the same hash")
 		}
@@ -74,14 +74,14 @@ func TestVerifyPassword(t *testing.T) {
 		{"test"},
 	}
 	for _, test := range tests {
-		hashed, err := hashPassword(test.password)
+		hashed, err := HashPassword(test.password)
 		if err != nil {
 			t.Errorf("Error hashing password: %v", err)
 		}
-		if verifyPassword(test.password, hashed) != nil {
+		if VerifyPassword(test.password, hashed) != nil {
 			t.Errorf("Expected password to match hash, but it didn't")
 		}
-		if verifyPassword("wrong password", hashed) == nil {
+		if VerifyPassword("wrong password", hashed) == nil {
 			t.Errorf("Expected password not to match hash, but it did")
 		}
 	}
