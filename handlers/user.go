@@ -53,7 +53,7 @@ func handleUserPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hashedPassword, err := hashPassword(password)
+	hashedPassword, err := HashPassword(password)
 	if err != nil {
 		http.Error(w, "Error processing password.", http.StatusInternalServerError)
 		return
@@ -143,11 +143,11 @@ func isValidPassword(password string) bool {
 	return len(password) >= 12
 }
 
-func hashPassword(password string) (string, error) {
+func HashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(hash), err
 }
 
-func verifyPassword(password, hash string) error {
+func VerifyPassword(password, hash string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 }
