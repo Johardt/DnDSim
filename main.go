@@ -4,6 +4,7 @@ import (
 	"DnDSim/db"
 	"DnDSim/handlers"
 	"DnDSim/views"
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -23,9 +24,10 @@ func main() {
 	handlers.RegisterUserRoutes()
 
 	port := "8080"
-	if len(os.Args) > 1 {
-		port = os.Args[1]
-	}
+	flagSet := flag.NewFlagSet("port", flag.ExitOnError)
+	flagSet.StringVar(&port, "port", "8080", "Port to run the server on")
+	flagSet.StringVar(&port, "p", "8080", "Port to run the server on (shorthand)")
+	flagSet.Parse(os.Args[1:])
 
 	log.Fatal(http.ListenAndServe("localhost:"+port, nil))
 }
