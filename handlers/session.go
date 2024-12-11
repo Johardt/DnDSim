@@ -2,12 +2,11 @@ package handlers
 
 import (
 	"DnDSim/db"
+	"DnDSim/views"
 	"database/sql"
 	"net/http"
 	"time"
 )
-
-// TODO Set cookie to secure (HTTPS only)
 
 func RegisterSessionRoutes() {
 	http.HandleFunc("/sessions", handleSessions)
@@ -49,6 +48,7 @@ func handleSessionPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO Set cookie to secure (HTTPS only)
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session",
 		Value:    id,
@@ -60,6 +60,7 @@ func handleSessionPost(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusOK)
+	views.GameSelector().Render(r.Context(), w)
 }
 
 func handleSessionDelete(w http.ResponseWriter, r *http.Request) {

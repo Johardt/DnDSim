@@ -2,7 +2,7 @@ package views
 
 templ LoginForm() {
 	<div class="flex items-center justify-center px-4 bg-transparent">
-		<form class="space-y-4" hx-post="/users" hx-swap="outerHTML">
+		<form class="space-y-4" hx-post="/sessions" hx-swap="outerHTML" hx-target="#content">
 			<!-- Email Field -->
 			<div>
 				<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
