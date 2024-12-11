@@ -42,6 +42,11 @@ func handleSessionPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if db.SessionExists(user.ID) {
+		http.Error(w, "Session already exists", http.StatusConflict)
+		return
+	}
+
 	id, err := db.CreateSession(user.ID)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

@@ -64,3 +64,12 @@ func UpdateSessionExpiration(id string) error {
 	_, err := DB.Exec(query, time.Now().Add(time.Hour*24), id)
 	return err
 }
+
+func SessionExists(userId int) bool{
+	query := `SELECT id FROM sessions WHERE user_id = ?;`
+	row := DB.QueryRow(query, userId)
+
+	var id string
+	err := row.Scan(&id)
+	return err == nil
+}
