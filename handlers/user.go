@@ -12,6 +12,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const MIN_PASSWORD_LENGTH = 3
+
 func RegisterUserRoutes() {
 	http.HandleFunc("/users", handleUsers)
 	http.HandleFunc("/users/email", handleUserEmail)
@@ -132,7 +134,10 @@ func handleUserPassword(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if !isValidPassword(password) {
-		views.UserPasswordField(password, "Password too short! Minimum 12 characters.").Render(r.Context(), w)
+		views.UserPasswordField(
+			password,
+			"Password too short! Minimum "+strconv.Itoa(MIN_PASSWORD_LENGTH)+" characters.",
+		).Render(r.Context(), w)
 		return
 	}
 
@@ -140,7 +145,7 @@ func handleUserPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func isValidPassword(password string) bool {
-	return len(password) >= 12
+	return len(password) >= MIN_PASSWORD_LENGTH
 }
 
 func HashPassword(password string) (string, error) {
