@@ -58,3 +58,9 @@ func DeleteSession(id string) error {
 	_, err := DB.Exec(query, id)
 	return err
 }
+
+func UpdateSessionExpiration(id string) error {
+	query := `UPDATE sessions SET expires_at = ? WHERE id = ?;`
+	_, err := DB.Exec(query, time.Now().Add(time.Hour*24), id)
+	return err
+}

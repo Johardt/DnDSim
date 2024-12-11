@@ -3,6 +3,7 @@ package main
 import (
 	"DnDSim/db"
 	"DnDSim/handlers"
+	"DnDSim/middleware"
 	"DnDSim/views"
 	"flag"
 	"log"
@@ -20,7 +21,8 @@ func main() {
 	http.Handle("/index", templ.Handler(views.IndexPage()))
 	http.Handle("/login", templ.Handler(views.LoginForm()))
 	http.Handle("/register", templ.Handler(views.RegisterPage()))
-	http.Handle("/play", templ.Handler(views.GameSelector()))
+
+	http.Handle("/play", middleware.Auth(templ.Handler(views.GameSelector())))
 
 	handlers.RegisterUserRoutes()
 	handlers.RegisterSessionRoutes()
