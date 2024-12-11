@@ -1,16 +1,7 @@
 package db
 
 import (
-	"database/sql"
-	"log"
-	"sync"
-
 	_ "github.com/mattn/go-sqlite3"
-)
-
-var (
-	DB   *sql.DB
-	once sync.Once
 )
 
 type User struct {
@@ -20,34 +11,17 @@ type User struct {
 	CreatedAt string
 }
 
-func InitializeDB(dataSourceName string) {
-	once.Do(func() {
-		var err error
-		DB, err = sql.Open("sqlite3", dataSourceName)
-		if err != nil {
-			log.Fatalf("Failed to open database: %v", err)
-		}
+func createUsersTable() error {
+	createTableQuery := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		email TEXT NOT NULL UNIQUE,
+		password TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);`
 
-		// Create users table
-		createTableQuery := `
-		CREATE TABLE IF NOT EXISTS users (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			email TEXT NOT NULL UNIQUE,
-			password TEXT NOT NULL,
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-		);`
-
-		_, err = DB.Exec(createTableQuery)
-		if err != nil {
-			log.Fatalf("Failed to create users table: %v", err)
-		}
-	})
-}
-
-func CloseDB() {
-	if DB != nil {
-		DB.Close()
-	}
+	_, err := DB.Exec(createTableQuery)
+	return err
 }
 
 func CreateUser(email, hashedPassword string) error {
