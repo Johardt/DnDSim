@@ -20,8 +20,10 @@ func main() {
 	http.Handle("/index", templ.Handler(views.IndexPage()))
 	http.Handle("/login", templ.Handler(views.LoginForm()))
 	http.Handle("/register", templ.Handler(views.RegisterPage()))
+	http.Handle("/play", templ.Handler(views.GameSelector()))
 
 	handlers.RegisterUserRoutes()
+	handlers.RegisterSessionRoutes()
 
 	port := "8080"
 	flagSet := flag.NewFlagSet("port", flag.ExitOnError)
