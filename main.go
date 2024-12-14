@@ -33,5 +33,6 @@ func main() {
 	flagSet.StringVar(&port, "p", "8080", "Port to run the server on (shorthand)")
 	flagSet.Parse(os.Args[1:])
 
+	log.Printf("Server running on localhost:%s\n", port)
 	log.Fatal(http.ListenAndServe("localhost:"+port, nil))
 }
