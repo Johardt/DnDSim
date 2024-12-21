@@ -15,6 +15,7 @@ import (
 func RegisterUserRoutes(g *echo.Group) {
 	g.POST("", handleUserPost)
 	g.GET("/:email", handleUserGet)
+	g.POST("/username", handleUsername)
 	g.POST("/email", handleUserEmail)
 	g.POST("/password", handleUserPassword)
 }
@@ -78,6 +79,17 @@ func handleUserGet(c echo.Context) error {
 
 	responseString := "ID: " + strconv.Itoa(response.ID) + ", Email: " + response.Email + ", Created At: " + response.CreatedAt
 	return c.String(http.StatusOK, responseString)
+}
+
+func handleUsername(c echo.Context) error {
+	username := c.FormValue("username")
+
+	if err := ValidateUsername(username); err != nil {
+		log.Println(err.Error())
+		return c.String(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	return c.String(http.StatusOK, "")
 }
 
 func handleUserEmail(c echo.Context) error {

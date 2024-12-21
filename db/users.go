@@ -27,7 +27,7 @@ func createUsersTable() error {
 }
 
 func CreateUser(username, email, hashedPassword string) error {
-	query := `INSERT INTO users (email, password) VALUES (?, ?);`
+	query := `INSERT INTO users (username, email, password) VALUES (?, ?, ?);`
 	_, err := DB.Exec(query, username, email, hashedPassword)
 	return err
 }

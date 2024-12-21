@@ -10,6 +10,23 @@ templ Form(target, submitName string) {
 	</form>
 }
 
+templ UsernameFormField(formID, hxPath string) {
+	<div hx-target="#username-error" class="min-w-full">
+		<label for="username" class="block mb-1 text-sm font-medium text-gray-300">Username</label>
+		<input
+			type="text"
+			name="username"
+			id="username"
+			autocomplete="username"
+			required
+			form={ formID }
+			hx-post={ hxPath }
+			class="block w-full px-3 py-2 text-white placeholder-gray-500 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+		/>
+		<p id="username-error" class="mt-1 text-sm text-red-500"></p>
+	</div>
+}
+
 templ EmailFormField(formID, hxPath string) {
 	<div hx-target="#email-error" class="min-w-full">
 		<label for="email" class="block mb-1 text-sm font-medium text-gray-300">Email</label>
