@@ -3,23 +3,15 @@ package handlers
 import (
 	"DnDSim/db"
 	"DnDSim/views"
+	"DnDSim/views/common"
 	"database/sql"
 	"log"
 	"net/http"
-	"regexp"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
-
-const MIN_PASSWORD_LENGTH = 3
-
-// func RegisterUserRoutes() {
-// 	http.HandleFunc("/users", handleUsers)
-// 	http.HandleFunc("/users/email", handleUserEmail)
-// 	http.HandleFunc("/users/password", handleUserPassword)
-// }
 
 func RegisterUserRoutes(g *echo.Group) {
 	g.POST("", handleUserPost)
@@ -28,29 +20,22 @@ func RegisterUserRoutes(g *echo.Group) {
 	g.POST("/password", handleUserPassword)
 }
 
-// TODO duplicate code and error handling is horrible
 func handleUserPost(c echo.Context) error {
 	username := c.FormValue("username")
 	email := c.FormValue("email")
 	password := c.FormValue("password")
 
-	// Validate input
-	if !isValidEmail(email) {
-		// TODO this should also be a 422, but should not replace the form
-		return c.String(http.StatusBadRequest, "Invalid email address.")
+	if err := ValidateUsername(username); err != nil {
+		log.Println(err.Error())
+		return RenderTempl(c, http.StatusUnprocessableEntity, views.RegisterForm())
 	}
-	if !isValidPassword(password) {
-		// TODO same here
-		return c.String(http.StatusBadRequest, "Password too short! Minimum 12 characters.")
+	if err := ValidateEmail(email); err != nil {
+		log.Println(err.Error())
+		return RenderTempl(c, http.StatusUnprocessableEntity, views.RegisterForm())
 	}
-
-	// Check if user already exists
-	// TODO check for username as well
-	_, err := db.GetUserByEmail(email)
-	if err == nil {
-		return c.String(http.StatusConflict, "Email already registered.")
-	} else if err != sql.ErrNoRows {
-		return c.String(http.StatusInternalServerError, "Internal Server Error: "+err.Error())
+	if err := ValidatePassword(password); err != nil {
+		log.Println(err.Error())
+		return RenderTempl(c, http.StatusUnprocessableEntity, views.RegisterForm())
 	}
 
 	hashedPassword, err := HashPassword(password)
@@ -66,7 +51,6 @@ func handleUserPost(c echo.Context) error {
 	return c.String(http.StatusCreated, "User created successfully!")
 }
 
-// TODO actually return a User or something
 func handleUserGet(c echo.Context) error {
 	email := c.QueryParam("email")
 	if email == "" {
@@ -97,40 +81,26 @@ func handleUserGet(c echo.Context) error {
 	return c.String(http.StatusOK, responseString)
 }
 
-func isValidEmail(email string) bool {
-	validDomains := `com|org|net|de|nl`
-	regexPattern := `^[^@]+@[^@.]+\.(` + validDomains + `)$`
-	re := regexp.MustCompile(regexPattern)
-	return re.MatchString(email)
-}
-
 func handleUserEmail(c echo.Context) error {
 	email := c.FormValue("email")
 
-	if !isValidEmail(email) {
-		log.Println("Invalid email address provided.")
-		return RenderTempl(c, http.StatusUnprocessableEntity,
-			views.UserInputField("email", email, "Invalid email address provided."),
-		)
+	if err := ValidateEmail(email); err != nil {
+		log.Println(err.Error())
+		return RenderTempl(c, http.StatusUnprocessableEntity, common.UserInputField("Email", "email", email, err.Error()))
 	}
 
-	return RenderTempl(c, http.StatusOK, views.UserInputField("email", email, ""))
+	return RenderTempl(c, http.StatusOK, common.UserInputField("Email", "email", email, ""))
 }
 
 func handleUserPassword(c echo.Context) error {
 	password := c.FormValue("password")
 
-	if !isValidPassword(password) {
-		return RenderTempl(c, http.StatusUnprocessableEntity,
-			views.UserPasswordField(password, "Password too short! Minimum "+strconv.Itoa(MIN_PASSWORD_LENGTH)+" characters."),
-		)
+	if err := ValidatePassword(password); err != nil {
+		log.Println(err.Error())
+		return RenderTempl(c, http.StatusUnprocessableEntity, common.UserPasswordField("Password", password, err.Error()))
 	}
 
-	return RenderTempl(c, http.StatusOK, views.UserPasswordField(password, ""))
-}
-
-func isValidPassword(password string) bool {
-	return len(password) >= MIN_PASSWORD_LENGTH
+	return RenderTempl(c, http.StatusOK, common.UserPasswordField("Password", password, ""))
 }
 
 func HashPassword(password string) (string, error) {

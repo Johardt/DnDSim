@@ -1,33 +1,15 @@
 package views
 
+import "DnDSim/views/common"
+
 templ RegisterPage() {
 	@BasePage(true) {
-		<div class="w-2/6 flex items-center justify-center px-4 bg-transparent">
-			<div class="w-full p-8 bg-gray-800 rounded-lg shadow-lg transition-shadow duration-300 animate-fadeIn">
-				<h1 class="text-3xl font-bold mb-6 text-center text-gray-100">Register</h1>
-				<form class="space-y-4" hx-post="/users" hx-swap="outerHTML">
-					<!-- Username Field -->
-					<div>
-						<label for="username" class="block text-sm font-medium text-gray-300">Username</label>
-						@UserInputField("username", "", "")
-					</div>
-					<!-- Email Field -->
-					<div>
-						<label for="email" class="block text-sm font-medium text-gray-300">Email Address</label>
-						@UserInputField("email", "", "")
-					</div>
-					<!-- Password Field -->
-					<div>
-						<label for="password" class="block text-sm font-medium text-gray-300">Password</label>
-						@UserPasswordField("", "")
-					</div>
-					<!-- Register Button -->
-					<button type="submit" class="w-full py-2 px-4 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300">
-						Register
-					</button>
-				</form>
+		<div class="flex items-center justify-center w-2/6 px-4 bg-transparent">
+			<div class="w-full p-8 transition-shadow duration-300 bg-gray-800 rounded-lg shadow-lg animate-fadeIn">
+				<h1 class="mb-6 text-3xl font-bold text-center text-gray-100">Register</h1>
+				@RegisterForm()
 				<!-- Return Button -->
-				<button hx-get="/" hx-target="body" hx-push-url="true" class="w-full mt-4 py-2 px-4 bg-gray-500 text-white rounded-md shadow hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-300">
+				<button hx-get="/" hx-target="body" hx-push-url="true" class="w-full px-4 py-2 mt-4 text-white transition duration-300 bg-gray-500 rounded-md shadow hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400">
 					Return to Main Page
 				</button>
 			</div>
@@ -35,36 +17,10 @@ templ RegisterPage() {
 	}
 }
 
-templ UserInputField(name, value, err string) {
-	<div hx-target="this" hx-swap="outerHTML" class="mt-1 min-w-full">
-		<input
-			type="text"
-			name={ name }
-			id={ name }
-			value={ value }
-			required
-			hx-post={ "/users/" + name }
-			class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white placeholder-gray-500"
-		/>
-		if err != "" {
-			<p class="mt-1 text-sm text-red-500">{ err }</p>
-		}
-	</div>
-}
-
-templ UserPasswordField(value, err string) {
-	<div hx-target="this" hx-swap="outerHTML" class="mt-1 min-w-full">
-		<input
-			type="password"
-			name="password"
-			id="password"
-			value={ value }
-			required
-			hx-post="/users/password"
-			class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white placeholder-gray-500"
-		/>
-		if err != "" {
-			<p class="mt-1 text-sm text-red-500">{ err }</p>
-		}
-	</div>
+templ RegisterForm() {
+	@common.Form("/users", "Register") {
+		@common.UserInputField("Username", "username", "", "")
+		@common.UserInputField("Email", "email", "", "")
+		@common.UserPasswordField("Password", "", "")
+	}
 }
