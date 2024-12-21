@@ -14,7 +14,7 @@ func RegisterRoutes(e *echo.Echo) {
 	e.Use(middleware.Recover())
 
 	e.GET("/", func(c echo.Context) error {
-		return handlers.RenderTempl(c, http.StatusOK, views.BasePage())
+		return handlers.RenderTempl(c, http.StatusOK, views.IndexPage())
 	})
 
 	e.GET("/index", func(c echo.Context) error {

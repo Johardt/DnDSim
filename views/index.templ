@@ -1,6 +1,6 @@
 package views
 
-templ BasePage() {
+templ BasePage(enableDecorations bool) {
 	<!DOCTYPE html>
 	<html lang="en-US">
 		<head>
@@ -10,7 +10,7 @@ templ BasePage() {
 			<!-- Tailwind CSS CDN -->
 			<script src="https://cdn.tailwindcss.com"></script>
 			<!-- HTMX CDN -->
-			<script src="https://unpkg.com/htmx.org@2.0.3"></script>
+			<script src="https://unpkg.com/htmx.org@2.0.4"></script>
 			<script>
 				htmx.on("htmx:beforeSwap", (e) => {
 					// Allow 422 responses to swap
@@ -38,55 +38,60 @@ templ BasePage() {
 		</head>
 		<body class="bg-gradient-to-r from-gray-500 via-gray-400 to-gray-300 dark:bg-gradient-to-r dark:from-gray-800 dark:via-gray-900 dark:to-black text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-500">
 			<!-- Header Section -->
-			<header class="w-full py-4 bg-transparent">
-				<div class="container mx-auto flex justify-between items-center px-4">
-					<button hx-get="/" hx-target="body" hx-swap="outerHTML" class="text-3xl font-extrabold tracking-wide">DnD Simulator</button>
-					@AuthButtons()
-				</div>
-			</header>
+			if enableDecorations {
+				<header class="w-full py-4 bg-transparent">
+					<div class="container mx-auto flex justify-between items-center px-4">
+						<a href="/" class="text-3xl font-extrabold tracking-wide">
+							DnD Simulator
+						</a>
+						@AuthButtons()
+					</div>
+				</header>
+			}
 			<!-- Main Content -->
 			<main id="content" class="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
-				@IndexPage()
+				{ children... }
 			</main>
 			<!-- Footer Section -->
-			<footer class="w-full py-4 bg-transparent">
-				<div class="container mx-auto text-center text-sm">
-					This is just an educational project. I absolutely do not own the copyright.
-				</div>
-			</footer>
+			if enableDecorations {
+				<footer class="w-full py-4 bg-transparent">
+					<div class="container mx-auto text-center text-sm">
+						This is just an educational project. I absolutely do not own the copyright.
+					</div>
+				</footer>
+			}
 		</body>
 	</html>
 }
 
 templ AuthButtons() {
 	<div class="flex space-x-6">
-		<button
-			hx-get="/login"
-			hx-target="#content"
+		<a
+			href="/login"
 			class="px-4 py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-300 transform hover:-translate-y-1 hover:scale-105"
 		>
 			Log In
-		</button>
-		<button
-			hx-get="/register"
-			hx-target="#content"
+		</a>
+		<a
+			href="/register"
 			class="px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300 transform hover:-translate-y-1 hover:scale-105"
 		>
 			Register
-		</button>
+		</a>
 	</div>
 }
 
 templ IndexPage() {
-	<div class="text-center">
-		<h1 class="text-5xl font-extrabold mb-6 animate-fadeIn">Welcome to the Dungeon</h1>
-		<p class="text-lg mb-12 animate-fadeIn">Embark on your epic journey. Hit the button below to begin.</p>
-		<button
-			hx-get="/start"
-			hx-target="#content"
-			class="px-10 py-5 bg-red-500 text-white rounded-full shadow-lg text-2xl font-bold hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-300 transform hover:-translate-y-1 hover:scale-105 animate-fadeIn"
-		>
-			Start Game
-		</button>
-	</div>
+	@BasePage(true) {
+		<div class="text-center">
+			<h1 class="text-5xl font-extrabold mb-6 animate-fadeIn">Welcome to the Dungeon</h1>
+			<p class="text-lg mb-12 animate-fadeIn">Embark on your epic journey. Hit the button below to begin.</p>
+			<a
+				href="/start"
+				class="px-10 py-5 bg-red-500 text-white rounded-full shadow-lg text-2xl font-bold hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-300 transform hover:-translate-y-1 hover:scale-105 animate-fadeIn"
+			>
+				Start Game
+			</a>
+		</div>
+	}
 }
