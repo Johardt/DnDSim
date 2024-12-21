@@ -50,22 +50,23 @@ func handleUserPost(c echo.Context) error {
 	if err == nil {
 		return c.String(http.StatusConflict, "Email already registered.")
 	} else if err != sql.ErrNoRows {
-		return c.String(http.StatusInternalServerError, "Internal Server Error")
+		return c.String(http.StatusInternalServerError, "Internal Server Error: "+err.Error())
 	}
 
 	hashedPassword, err := HashPassword(password)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Error processing password.")
+		return c.String(http.StatusInternalServerError, "Error processing password: "+err.Error())
 	}
 
 	err = db.CreateUser(username, email, hashedPassword)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to create user.")
+		return c.String(http.StatusInternalServerError, "Error creating user: "+err.Error())
 	}
 
 	return c.String(http.StatusCreated, "User created successfully!")
 }
 
+// TODO actually return a User or something
 func handleUserGet(c echo.Context) error {
 	email := c.QueryParam("email")
 	if email == "" {
@@ -77,7 +78,7 @@ func handleUserGet(c echo.Context) error {
 		if err == sql.ErrNoRows {
 			return c.String(http.StatusNotFound, "User not found.")
 		} else {
-			return c.String(http.StatusInternalServerError, "Internal Server Error.")
+			return c.String(http.StatusInternalServerError, "Internal Server Error: "+err.Error())
 		}
 	}
 

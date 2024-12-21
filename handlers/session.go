@@ -31,7 +31,7 @@ func handleSessionPost(c echo.Context) error {
 	}
 
 	if db.SessionExists(user.ID) {
-		return c.Redirect(http.StatusSeeOther, "/")
+		return c.Redirect(http.StatusSeeOther, "/index")
 	}
 
 	id, err := db.CreateSession(user.ID)
@@ -48,7 +48,7 @@ func handleSessionPost(c echo.Context) error {
 		SameSite: http.SameSiteStrictMode,
 		Path:     "/",
 	})
-	return c.Redirect(http.StatusOK, "/")
+	return c.Redirect(http.StatusSeeOther, "/index")
 }
 
 func handleSessionDelete(c echo.Context) error {
@@ -61,5 +61,5 @@ func handleSessionDelete(c echo.Context) error {
 		return c.HTML(http.StatusInternalServerError, "Internal Server Error")
 	}
 
-	return c.Redirect(http.StatusNoContent, "/")
+	return c.Redirect(http.StatusSeeOther, "/index")
 }
