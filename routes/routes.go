@@ -13,6 +13,8 @@ func RegisterRoutes(e *echo.Echo) {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	e.Static("/static", "./static")
+
 	e.GET("/", func(c echo.Context) error {
 		return handlers.RenderTempl(c, http.StatusOK, views.IndexPage())
 	})

@@ -2,18 +2,23 @@ package views
 
 templ RegisterPage() {
 	@BasePage(true) {
-		<div class="flex items-center justify-center px-4 bg-transparent">
-			<div class="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg transition-shadow duration-300 animate-fadeIn">
-				<h1 class="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">Register</h1>
+		<div class="w-2/6 flex items-center justify-center px-4 bg-transparent">
+			<div class="w-full p-8 bg-gray-800 rounded-lg shadow-lg transition-shadow duration-300 animate-fadeIn">
+				<h1 class="text-3xl font-bold mb-6 text-center text-gray-100">Register</h1>
 				<form class="space-y-4" hx-post="/users" hx-swap="outerHTML">
+					<!-- Username Field -->
+					<div>
+						<label for="username" class="block text-sm font-medium text-gray-300">Username</label>
+						@UserInputField("username", "", "")
+					</div>
 					<!-- Email Field -->
 					<div>
-						<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
+						<label for="email" class="block text-sm font-medium text-gray-300">Email Address</label>
 						@UserInputField("email", "", "")
 					</div>
 					<!-- Password Field -->
 					<div>
-						<label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+						<label for="password" class="block text-sm font-medium text-gray-300">Password</label>
 						@UserPasswordField("", "")
 					</div>
 					<!-- Register Button -->
@@ -22,7 +27,7 @@ templ RegisterPage() {
 					</button>
 				</form>
 				<!-- Return Button -->
-				<button hx-get="/index" hx-target="#content" class="w-full mt-4 py-2 px-4 bg-gray-500 text-white rounded-md shadow hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-300">
+				<button hx-get="/" hx-target="body" hx-push-url="true" class="w-full mt-4 py-2 px-4 bg-gray-500 text-white rounded-md shadow hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-300">
 					Return to Main Page
 				</button>
 			</div>
@@ -31,7 +36,7 @@ templ RegisterPage() {
 }
 
 templ UserInputField(name, value, err string) {
-	<div hx-target="this" hx-swap="outerHTML" class="mt-1">
+	<div hx-target="this" hx-swap="outerHTML" class="mt-1 min-w-full">
 		<input
 			type="text"
 			name={ name }
@@ -39,8 +44,7 @@ templ UserInputField(name, value, err string) {
 			value={ value }
 			required
 			hx-post={ "/users/" + name }
-			class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
-			placeholder="Enter your email"
+			class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white placeholder-gray-500"
 		/>
 		if err != "" {
 			<p class="mt-1 text-sm text-red-500">{ err }</p>
@@ -49,7 +53,7 @@ templ UserInputField(name, value, err string) {
 }
 
 templ UserPasswordField(value, err string) {
-	<div hx-target="this" hx-swap="outerHTML" class="mt-1">
+	<div hx-target="this" hx-swap="outerHTML" class="mt-1 min-w-full">
 		<input
 			type="password"
 			name="password"
@@ -57,7 +61,7 @@ templ UserPasswordField(value, err string) {
 			value={ value }
 			required
 			hx-post="/users/password"
-			class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:placeholder-gray-500"
+			class="block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white placeholder-gray-500"
 		/>
 		if err != "" {
 			<p class="mt-1 text-sm text-red-500">{ err }</p>
