@@ -3,7 +3,6 @@ package handlers
 import (
 	"DnDSim/db"
 	"DnDSim/views"
-	"DnDSim/views/common"
 	"database/sql"
 	"log"
 	"net/http"
@@ -86,10 +85,10 @@ func handleUserEmail(c echo.Context) error {
 
 	if err := ValidateEmail(email); err != nil {
 		log.Println(err.Error())
-		return RenderTempl(c, http.StatusUnprocessableEntity, common.UserInputField("Email", "email", email, err.Error()))
+		return c.String(http.StatusUnprocessableEntity, err.Error())
 	}
 
-	return RenderTempl(c, http.StatusOK, common.UserInputField("Email", "email", email, ""))
+	return c.String(http.StatusOK, "")
 }
 
 func handleUserPassword(c echo.Context) error {
@@ -97,10 +96,10 @@ func handleUserPassword(c echo.Context) error {
 
 	if err := ValidatePassword(password); err != nil {
 		log.Println(err.Error())
-		return RenderTempl(c, http.StatusUnprocessableEntity, common.UserPasswordField("Password", password, err.Error()))
+		return c.String(http.StatusUnprocessableEntity, err.Error())
 	}
 
-	return RenderTempl(c, http.StatusOK, common.UserPasswordField("Password", password, ""))
+	return c.String(http.StatusOK, "")
 }
 
 func HashPassword(password string) (string, error) {

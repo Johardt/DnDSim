@@ -10,6 +10,40 @@ templ Form(target, submitName string) {
 	</form>
 }
 
+templ EmailFormField(formID, hxPath string) {
+	<div hx-target="#email-error" class="min-w-full">
+		<label for="email" class="block mb-1 text-sm font-medium text-gray-300">Email</label>
+		<input
+			type="text"
+			name="email"
+			id="email"
+			autocomplete="email"
+			required
+			form={ formID }
+			hx-post={ hxPath }
+			class="block w-full px-3 py-2 text-white placeholder-gray-500 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+		/>
+		<p id="email-error" class="mt-1 text-sm text-red-500"></p>
+	</div>
+}
+
+templ PasswordFormField(formID, hxPath string) {
+	<div hx-target="#password-error" class="min-w-full">
+		<label for="password" class="block mb-1 text-sm font-medium text-gray-300">Password</label>
+		<input
+			type="password"
+			name="password"
+			id="password"
+			required
+			form={ formID }
+			hx-post={ hxPath }
+			class="block w-full px-3 py-2 text-white placeholder-gray-500 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+		/>
+		<p id="password-error" class="mt-1 text-sm text-red-500"></p>
+	</div>
+}
+
+// Deprecated: Use FormFields instead
 templ UserInputField(label, name, value, err string) {
 	<div hx-target="this" hx-swap="outerHTML" class="min-w-full">
 		<label for={ name } class="block mb-1 text-sm font-medium text-gray-300">{ label }</label>
@@ -20,25 +54,8 @@ templ UserInputField(label, name, value, err string) {
 			value={ value }
 			autocomplete={ name }
 			required
+			form="register-form"
 			hx-post={ "/users/" + name }
-			class="block w-full px-3 py-2 text-white placeholder-gray-500 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-		/>
-		if err != "" {
-			<p class="mt-1 text-sm text-red-500">{ err }</p>
-		}
-	</div>
-}
-
-templ UserPasswordField(label, value, err string) {
-	<div hx-target="this" hx-swap="outerHTML" class="min-w-full">
-		<label for="password" class="block mb-1 text-sm font-medium text-gray-300">{ label }</label>
-		<input
-			type="password"
-			name="password"
-			id="password"
-			value={ value }
-			required
-			hx-post="/users/password"
 			class="block w-full px-3 py-2 text-white placeholder-gray-500 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
 		/>
 		if err != "" {

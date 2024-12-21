@@ -7,7 +7,6 @@ templ LoginPage() {
 		<div class="flex items-center justify-center px-4 bg-transparent">
 			@common.Form("/sessions", "Login") {
 				@common.UserInputField("Email Address", "email", "", "")
-				@common.UserPasswordField("Password", "password", "")
 			}
 		</div>
 	}
