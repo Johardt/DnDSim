@@ -15,6 +15,7 @@ func TestIsValidEmail(t *testing.T) {
 		{"test@domain.", false},
 		{"@.com", false},
 		{"test@com", false},
+		{"test@domain.com@domain.com", false},
 		{"test@domain.com", true},
 	}
 

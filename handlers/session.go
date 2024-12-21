@@ -2,59 +2,44 @@ package handlers
 
 import (
 	"DnDSim/db"
-	"DnDSim/views"
 	"database/sql"
 	"net/http"
 	"time"
+
+	"github.com/labstack/echo/v4"
 )
 
-func RegisterSessionRoutes() {
-	http.HandleFunc("/sessions", handleSessions)
+func RegisterSessionRoutes(g *echo.Group) {
+	g.POST("", handleSessionPost)
+	g.DELETE("", handleSessionDelete)
 }
 
-func handleSessions(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		handleSessionPost(w, r)
-	case http.MethodDelete:
-		handleSessionDelete(w, r)
-	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-	}
-}
-
-func handleSessionPost(w http.ResponseWriter, r *http.Request) {
-	email := r.FormValue("email")
-	password := r.FormValue("password")
+func handleSessionPost(c echo.Context) error {
+	email := c.FormValue("email")
+	password := c.FormValue("password")
 
 	user, err := db.GetUserByEmail(email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Invalid email or password.", http.StatusUnauthorized)
-			return
+			return c.HTML(http.StatusUnauthorized, "Invalid email or password.")
 		}
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+		return c.HTML(http.StatusInternalServerError, "Internal Server Error")
 	}
 
 	if VerifyPassword(password, user.Password) != nil {
-		http.Error(w, "Invalid email or password.", http.StatusUnauthorized)
-		return
+		return c.HTML(http.StatusUnauthorized, "Invalid email or password.")
 	}
 
 	if db.SessionExists(user.ID) {
-		http.Error(w, "Session already exists", http.StatusConflict)
-		return
+		return c.Redirect(http.StatusSeeOther, "/")
 	}
 
 	id, err := db.CreateSession(user.ID)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+		return c.HTML(http.StatusInternalServerError, "Internal Server Error")
 	}
 
-	// TODO Set cookie to secure (HTTPS only)
-	http.SetCookie(w, &http.Cookie{
+	c.SetCookie(&http.Cookie{
 		Name:     "session",
 		Value:    id,
 		Expires:  time.Now().Add(24 * time.Hour),
@@ -63,20 +48,18 @@ func handleSessionPost(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 		Path:     "/",
 	})
-
-	w.WriteHeader(http.StatusOK)
-	views.GameSelector().Render(r.Context(), w)
+	return c.Redirect(http.StatusOK, "/")
 }
 
-func handleSessionDelete(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session")
+func handleSessionDelete(c echo.Context) error {
+	cookie, err := c.Cookie("session")
 	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
+		return c.HTML(http.StatusUnauthorized, "Unauthorized")
 	}
 	err = db.DeleteSession(cookie.Value)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+		return c.HTML(http.StatusInternalServerError, "Internal Server Error")
 	}
+
+	return c.Redirect(http.StatusNoContent, "/")
 }

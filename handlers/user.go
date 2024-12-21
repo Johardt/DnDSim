@@ -9,83 +9,76 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
 const MIN_PASSWORD_LENGTH = 3
 
-func RegisterUserRoutes() {
-	http.HandleFunc("/users", handleUsers)
-	http.HandleFunc("/users/email", handleUserEmail)
-	http.HandleFunc("/users/password", handleUserPassword)
+// func RegisterUserRoutes() {
+// 	http.HandleFunc("/users", handleUsers)
+// 	http.HandleFunc("/users/email", handleUserEmail)
+// 	http.HandleFunc("/users/password", handleUserPassword)
+// }
+
+func RegisterUserRoutes(g *echo.Group) {
+	g.POST("", handleUserPost)
+	g.GET("/:email", handleUserGet)
+	g.POST("/email", handleUserEmail)
+	g.POST("/password", handleUserPassword)
 }
 
-func handleUsers(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		handleUserPost(w, r)
-	case http.MethodGet:
-		handleUserGet(w, r)
-	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-	}
-}
-
-func handleUserPost(w http.ResponseWriter, r *http.Request) {
-	email := r.FormValue("email")
-	password := r.FormValue("password")
+// TODO duplicate code and error handling is horrible
+func handleUserPost(c echo.Context) error {
+	username := c.FormValue("username")
+	email := c.FormValue("email")
+	password := c.FormValue("password")
 
 	// Validate input
 	if !isValidEmail(email) {
-		http.Error(w, "Invalid email address.", http.StatusBadRequest)
-		return
+		// TODO this should also be a 422, but should not replace the form
+		return c.String(http.StatusBadRequest, "Invalid email address.")
 	}
 	if !isValidPassword(password) {
-		http.Error(w, "Password too short! Minimum 12 characters.", http.StatusBadRequest)
-		return
+		// TODO same here
+		return c.String(http.StatusBadRequest, "Password too short! Minimum 12 characters.")
 	}
 
 	// Check if user already exists
+	// TODO check for username as well
 	_, err := db.GetUserByEmail(email)
 	if err == nil {
-		http.Error(w, "Email already registered.", http.StatusConflict)
-		return
+		return c.String(http.StatusConflict, "Email already registered.")
 	} else if err != sql.ErrNoRows {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
+		return c.String(http.StatusInternalServerError, "Internal Server Error")
 	}
 
 	hashedPassword, err := HashPassword(password)
 	if err != nil {
-		http.Error(w, "Error processing password.", http.StatusInternalServerError)
-		return
+		return c.String(http.StatusInternalServerError, "Error processing password.")
 	}
 
-	err = db.CreateUser(email, hashedPassword)
+	err = db.CreateUser(username, email, hashedPassword)
 	if err != nil {
-		http.Error(w, "Failed to create user.", http.StatusInternalServerError)
-		return
+		return c.String(http.StatusInternalServerError, "Failed to create user.")
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("User created successfully!"))
+	return c.String(http.StatusCreated, "User created successfully!")
 }
 
-func handleUserGet(w http.ResponseWriter, r *http.Request) {
-	email := r.URL.Query().Get("email")
+func handleUserGet(c echo.Context) error {
+	email := c.QueryParam("email")
 	if email == "" {
-		http.Error(w, "Email query parameter is required.", http.StatusBadRequest)
-		return
+		return c.String(http.StatusBadRequest, "Email query parameter is required.")
 	}
 
 	user, err := db.GetUserByEmail(email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "User not found.", http.StatusNotFound)
+			return c.String(http.StatusNotFound, "User not found.")
 		} else {
-			http.Error(w, "Internal Server Error.", http.StatusInternalServerError)
+			return c.String(http.StatusInternalServerError, "Internal Server Error.")
 		}
-		return
 	}
 
 	// For security reasons, do not send the password hash
@@ -100,7 +93,7 @@ func handleUserGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responseString := "ID: " + strconv.Itoa(response.ID) + ", Email: " + response.Email + ", Created At: " + response.CreatedAt
-	w.Write([]byte(responseString))
+	return c.String(http.StatusOK, responseString)
 }
 
 func isValidEmail(email string) bool {
@@ -110,38 +103,29 @@ func isValidEmail(email string) bool {
 	return re.MatchString(email)
 }
 
-func handleUserEmail(w http.ResponseWriter, r *http.Request) {
-	email := r.FormValue("email")
+func handleUserEmail(c echo.Context) error {
+	email := c.FormValue("email")
 
 	if !isValidEmail(email) {
 		log.Println("Invalid email address provided.")
-		views.UserInputField(
-			"email",
-			email,
-			"Invalid email address provided.",
-		).Render(r.Context(), w)
-		return
+		return RenderTempl(c, http.StatusUnprocessableEntity,
+			views.UserInputField("email", email, "Invalid email address provided."),
+		)
 	}
 
-	views.UserInputField(
-		"email",
-		email,
-		"",
-	).Render(r.Context(), w)
+	return RenderTempl(c, http.StatusOK, views.UserInputField("email", email, ""))
 }
 
-func handleUserPassword(w http.ResponseWriter, r *http.Request) {
-	password := r.FormValue("password")
+func handleUserPassword(c echo.Context) error {
+	password := c.FormValue("password")
 
 	if !isValidPassword(password) {
-		views.UserPasswordField(
-			password,
-			"Password too short! Minimum "+strconv.Itoa(MIN_PASSWORD_LENGTH)+" characters.",
-		).Render(r.Context(), w)
-		return
+		return RenderTempl(c, http.StatusUnprocessableEntity,
+			views.UserPasswordField(password, "Password too short! Minimum "+strconv.Itoa(MIN_PASSWORD_LENGTH)+" characters."),
+		)
 	}
 
-	views.UserPasswordField(password, "").Render(r.Context(), w)
+	return RenderTempl(c, http.StatusOK, views.UserPasswordField(password, ""))
 }
 
 func isValidPassword(password string) bool {
