@@ -2,30 +2,20 @@ package main
 
 import (
 	"DnDSim/db"
-	"DnDSim/handlers"
-	"DnDSim/middleware"
-	"DnDSim/views"
+	"DnDSim/routes"
 	"flag"
 	"log"
-	"net/http"
 	"os"
 
-	"github.com/a-h/templ"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
-	db.InitializeDB("users.db")
+	db.InitializeDB("main.db")
 	defer db.CloseDB()
 
-	http.Handle("/", templ.Handler(views.BasePage()))
-	http.Handle("/index", templ.Handler(views.IndexPage()))
-	http.Handle("/login", templ.Handler(views.LoginForm()))
-	http.Handle("/register", templ.Handler(views.RegisterPage()))
-
-	http.Handle("/play", middleware.Auth(templ.Handler(views.GameSelector())))
-
-	handlers.RegisterUserRoutes()
-	handlers.RegisterSessionRoutes()
+	e := echo.New()
+	routes.RegisterRoutes(e)
 
 	port := "8080"
 	flagSet := flag.NewFlagSet("port", flag.ExitOnError)
@@ -34,5 +24,5 @@ func main() {
 	flagSet.Parse(os.Args[1:])
 
 	log.Printf("Server running on localhost:%s\n", port)
-	log.Fatal(http.ListenAndServe("localhost:"+port, nil))
+	e.Logger.Fatal(e.Start("localhost:" + port))
 }

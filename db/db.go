@@ -19,10 +19,7 @@ func InitializeDB(dataSourceName string) {
 			log.Fatalf("Failed to open database: %v", err)
 		}
 
-		_, err = DB.Exec("PRAGMA foreign_keys = ON;")
-		if err != nil {
-			log.Fatalf("Failed to enable foreign keys: %v", err)
-		}
+		setPragmas()
 
 		err = createUsersTable()
 		if err != nil {
@@ -34,6 +31,33 @@ func InitializeDB(dataSourceName string) {
 			log.Fatalf("Failed to create sessions table: %v", err)
 		}
 	})
+}
+
+func setPragmas() {
+	_, err := DB.Exec("PRAGMA foreign_keys = ON;")
+	if err != nil {
+		log.Fatalf("Failed to enable foreign keys: %v", err)
+	}
+
+	_, err = DB.Exec("PRAGMA synchronous = OFF;")
+	if err != nil {
+		log.Fatalf("Failed to set PRAGMA synchronous: %v", err)
+	}
+
+	_, err = DB.Exec("PRAGMA journal_mode = WAL;")
+	if err != nil {
+		log.Fatalf("Failed to set PRAGMA journal_mode: %v", err)
+	}
+
+	_, err = DB.Exec("PRAGMA cache_size = 10000;")
+	if err != nil {
+		log.Fatalf("Failed to set PRAGMA cache_size: %v", err)
+	}
+
+	_, err = DB.Exec("PRAGMA temp_store = MEMORY;")
+	if err != nil {
+		log.Fatalf("Failed to set PRAGMA temp_store: %v", err)
+	}
 }
 
 func CloseDB() {

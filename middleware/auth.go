@@ -5,6 +5,8 @@ import (
 	"context"
 	"net/http"
 	"time"
+
+	"github.com/labstack/echo/v4"
 )
 
 type contextKey string
@@ -13,34 +15,34 @@ const (
 	userIDKey contextKey = "userID"
 )
 
-func Auth(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("session")
-		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
+func Auth() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			cookie, err := c.Cookie("session_id")
+			if err != nil {
+				return c.Redirect(http.StatusSeeOther, "/login")
+			}
+
+			sessionId := cookie.Value
+			session, err := db.GetSessionByID(sessionId)
+			if err != nil {
+				return c.Redirect(http.StatusSeeOther, "/login")
+			}
+
+			if session.ExpiresAt.Before(time.Now()) {
+				db.DeleteSession(sessionId)
+				return c.Redirect(http.StatusSeeOther, "/login")
+			}
+
+			err = db.UpdateSessionExpiration(sessionId)
+			if err != nil {
+				return c.String(http.StatusInternalServerError, "Internal Server Error")
+			}
+
+			ctx := context.WithValue(c.Request().Context(), userIDKey, session.UserID)
+			c.SetRequest(c.Request().WithContext(ctx))
+			return next(c)
 		}
 
-		sessionID := cookie.Value
-		session, err := db.GetSessionByID(sessionID)
-		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-
-		if session.ExpiresAt.Before(time.Now()) {
-			db.DeleteSession(sessionID)
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-
-		err = db.UpdateSessionExpiration(sessionID)
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		ctx := context.WithValue(r.Context(), userIDKey, session.UserID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	}
 }

@@ -1,7 +1,8 @@
 package db
 
 import (
-	"github.com/google/uuid"
+	"crypto/rand"
+	"encoding/hex"
 	"time"
 )
 
@@ -31,7 +32,7 @@ func createSessionsTable() error {
 }
 
 func CreateSession(userId int) (string, error) {
-	sessionId := uuid.New().String()
+	sessionId, _ := generateSessionID()
 
 	query := `INSERT INTO sessions (id, user_id, created_at, expires_at) VALUES (?, ?, ?, ?);`
 	_, err := DB.Exec(query, sessionId, userId, time.Now(), time.Now().Add(time.Hour*24))
@@ -65,11 +66,19 @@ func UpdateSessionExpiration(id string) error {
 	return err
 }
 
-func SessionExists(userId int) bool{
+func SessionExists(userId int) bool {
 	query := `SELECT id FROM sessions WHERE user_id = ?;`
 	row := DB.QueryRow(query, userId)
 
 	var id string
 	err := row.Scan(&id)
 	return err == nil
+}
+
+func generateSessionID() (string, error) {
+	bytes := make([]byte, 16)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
 }
