@@ -1,9 +1,10 @@
 package routes
 
 import (
+	"net/http"
+
 	"DnDSim/handlers"
 	"DnDSim/views"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -19,12 +20,8 @@ func RegisterRoutes(e *echo.Echo) {
 		return handlers.RenderTempl(c, http.StatusOK, views.IndexPage())
 	})
 
-	e.GET("/index", func(c echo.Context) error {
-		return handlers.RenderTempl(c, http.StatusOK, views.IndexPage())
-	})
-
 	e.GET("/login", func(c echo.Context) error {
-		return handlers.RenderTempl(c, http.StatusOK, views.LoginForm())
+		return handlers.RenderTempl(c, http.StatusOK, views.LoginPage())
 	})
 
 	e.GET("/register", func(c echo.Context) error {
