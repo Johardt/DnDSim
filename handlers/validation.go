@@ -20,7 +20,9 @@ func (v ValidationError) Error() string {
 }
 
 func ValidateUsername(username string) error {
-	if user, _ := db.GetUserByName(username); user != nil {
+	if len(username) < 3 {
+		return ValidationError{"username", "Username must be at least 3 characters long."}
+	} else if user, _ := db.GetUserByName(username); user != nil {
 		return ValidationError{"username", "Username already in use."}
 	}
 	return nil
