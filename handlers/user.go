@@ -52,16 +52,19 @@ func handleUserPost(c echo.Context) error {
 }
 
 func handleUserGet(c echo.Context) error {
-	email := c.QueryParam("email")
+	email := c.Param("email")
 	if email == "" {
+		log.Println("Email parameter is required.")
 		return c.String(http.StatusBadRequest, "Email query parameter is required.")
 	}
 
 	user, err := db.GetUserByEmail(email)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			log.Println("User not found.")
 			return c.String(http.StatusNotFound, "User not found.")
 		} else {
+			log.Println("Error getting user: " + err.Error())
 			return c.String(http.StatusInternalServerError, "Internal Server Error: "+err.Error())
 		}
 	}
