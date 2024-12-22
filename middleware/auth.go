@@ -18,7 +18,7 @@ const (
 func Auth() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			cookie, err := c.Cookie("session_id")
+			cookie, err := c.Cookie("session")
 			if err != nil {
 				return c.Redirect(http.StatusSeeOther, "/login")
 			}
