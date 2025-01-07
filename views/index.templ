@@ -1,6 +1,11 @@
 package views
 
-templ BasePage(enableDecorations bool) {
+import "DnDSim/db"
+
+// Just the base structure of any page, optionally includes a header and footer decorations (if enableDecorations = true).
+//
+// Other components can hx-target the #content element to replace the main content.
+templ BasePage(title string, enableDecorations bool) {
 	<!DOCTYPE html>
 	<html lang="en-US">
 		<head>
@@ -19,7 +24,7 @@ templ BasePage(enableDecorations bool) {
 					}
 				});
 			</script>
-			<title>DnD Simulator</title>
+			<title>DnD Simulator - { title }</title>
 			<style>
                 /* Custom Animations */
                 @keyframes fadeIn {
@@ -42,7 +47,8 @@ templ BasePage(enableDecorations bool) {
 						<a href="/" class="text-3xl font-extrabold tracking-wide">
 							DnD Simulator
 						</a>
-						@AuthButtons()
+						// Render either the Auth or profile buttons, depending on whether the user is logged in
+						<div hx-get="/sessions/validate" hx-swap="outerHTML" hx-trigger="load">Something went wrong...</div>
 					</div>
 				</header>
 			}
@@ -79,8 +85,20 @@ templ AuthButtons() {
 	</div>
 }
 
+templ ProfileButtons(session *db.Session) {
+	<div class="flex space-x-6">
+		<p class="align-baseline">Already logged in.</p>
+		<button
+			hx-delete="/sessions"
+			class="px-4 py-2 text-white transition duration-300 transform bg-blue-500 rounded-md shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:-translate-y-1 hover:scale-105"
+		>
+			Log out
+		</button>
+	</div>
+}
+
 templ IndexPage() {
-	@BasePage(true) {
+	@BasePage("Home", true) {
 		<div class="text-center">
 			<h1 class="mb-6 text-5xl font-extrabold animate-fadeIn">Welcome to the Dungeon</h1>
 			<p class="mb-12 text-lg animate-fadeIn">Embark on your epic journey. Hit the button below to begin.</p>

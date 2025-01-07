@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"DnDSim/db"
+	"DnDSim/views"
 	"database/sql"
 	"net/http"
 	"time"
@@ -12,26 +13,29 @@ import (
 func RegisterSessionRoutes(g *echo.Group) {
 	g.POST("", handleSessionPost)
 	g.DELETE("", handleSessionDelete)
+	g.POST("/check", handleCheck)
+	g.GET("/validate", validateSession)
 }
 
 func handleSessionPost(c echo.Context) error {
-	email := c.FormValue("email")
+	username := c.FormValue("username")
 	password := c.FormValue("password")
 
-	user, err := db.GetUserByEmail(email)
+	user, err := db.GetUserByName(username)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return c.HTML(http.StatusUnauthorized, "Invalid email or password.")
+			return c.HTML(http.StatusUnauthorized, "Invalid username or password.")
 		}
 		return c.HTML(http.StatusInternalServerError, "Internal Server Error")
 	}
 
 	if VerifyPassword(password, user.Password) != nil {
-		return c.HTML(http.StatusUnauthorized, "Invalid email or password.")
+		return c.HTML(http.StatusUnauthorized, "Invalid username or password.")
 	}
 
 	if db.SessionExists(user.ID) {
-		return c.Redirect(http.StatusSeeOther, "/index")
+		c.Response().Header().Add("HX-Redirect", "/")
+		return c.HTML(http.StatusSeeOther, "")
 	}
 
 	id, err := db.CreateSession(user.ID)
@@ -44,11 +48,13 @@ func handleSessionPost(c echo.Context) error {
 		Value:    id,
 		Expires:  time.Now().Add(24 * time.Hour),
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   true,
 		SameSite: http.SameSiteStrictMode,
 		Path:     "/",
 	})
-	return c.Redirect(http.StatusSeeOther, "/index")
+
+	c.Response().Header().Add("HX-Redirect", "/")
+	return c.HTML(http.StatusSeeOther, "")
 }
 
 func handleSessionDelete(c echo.Context) error {
@@ -61,5 +67,36 @@ func handleSessionDelete(c echo.Context) error {
 		return c.HTML(http.StatusInternalServerError, "Internal Server Error")
 	}
 
-	return c.Redirect(http.StatusSeeOther, "/index")
+	c.Response().Header().Add("HX-Redirect", "/")
+	return c.HTML(http.StatusSeeOther, "Redirecting...")
+}
+
+func handleCheck(c echo.Context) error {
+	// Check if there is a username form value
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	user, _ := db.GetUserByName(username)
+	if user == nil {
+		return c.String(http.StatusUnauthorized, "Invalid username or password.")
+	}
+
+	if VerifyPassword(password, user.Password) != nil {
+		return c.String(http.StatusUnauthorized, "Invalid username or password.")
+	}
+
+	return c.String(http.StatusOK, "")
+}
+
+func validateSession(c echo.Context) error {
+	cookie, err := c.Cookie("session")
+	if err != nil {
+		return RenderTempl(c, 200, views.AuthButtons())
+	}
+	session, err := db.GetSessionByID(cookie.Value);
+	if err != nil {
+		return RenderTempl(c, 200, views.AuthButtons())
+	}
+
+	return RenderTempl(c, 200, views.ProfileButtons(session))
 }
