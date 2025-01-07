@@ -3,3 +3,4 @@
 *_templ.txt
 **/tmp
 **/*.db*
+static/css/dist.css
