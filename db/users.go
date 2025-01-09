@@ -32,6 +32,18 @@ func CreateUser(username, email, hashedPassword string) error {
 	return err
 }
 
+func GetUserByID(id int) (*User, error) {
+	query := `SELECT id, username, email, password, created_at FROM users WHERE id = ?;`
+	row := DB.QueryRow(query, id)
+
+	var user User
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func GetUserByName(username string) (*User, error) {
 	query := `SELECT id, username, email, password, created_at FROM users WHERE username = ?;`
 	row := DB.QueryRow(query, username)

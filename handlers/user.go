@@ -14,6 +14,7 @@ import (
 
 func RegisterUserRoutes(g *echo.Group) {
 	g.POST("", handleUserPost)
+	g.GET("/id/:id", handleGetUserByID)
 	g.GET("/:email", handleUserGet)
 	g.POST("/username", handleUsername)
 	g.POST("/email", handleUserEmail)
@@ -49,6 +50,39 @@ func handleUserPost(c echo.Context) error {
 	}
 
 	return c.String(http.StatusCreated, "User created successfully!")
+}
+
+// TODO - Refactor the duplicate code in handleGetUserByID and handleUserGet
+func handleGetUserByID(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		log.Println("ID parameter is required.")
+		return c.String(http.StatusBadRequest, "ID query parameter is required.")
+	}
+
+	user, err := db.GetUserByID(id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Println("(GetUserByID) User not found.")
+			return c.String(http.StatusNotFound, "User not found.")
+		} else {
+			log.Println("Error getting user: " + err.Error())
+			return c.String(http.StatusInternalServerError, "Internal Server Error: "+err.Error())
+		}
+	}
+
+	// For security reasons, do not send the password hash
+	response := struct {
+		ID        int    `json:"id"`
+		Email     string `json:"email"`
+		CreatedAt string `json:"created_at"`
+	}{
+		ID:        user.ID,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 func handleUserGet(c echo.Context) error {

@@ -1,6 +1,9 @@
 package views
 
-import "DnDSim/db"
+import (
+	"DnDSim/db"
+	"DnDSim/views/common"
+)
 
 // Just the base structure of any page, optionally includes a header and footer decorations (if enableDecorations = true).
 //
@@ -11,7 +14,9 @@ templ BasePage(title string, enableDecorations bool) {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+			<link rel="preconnect" href="https://fonts.googleapis.com"/>
+			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+			<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
 			<link rel="stylesheet" href="../static/css/dist.css"/>
 			<script src="../static/htmx.min.js"></script>
 			<script>
@@ -48,7 +53,8 @@ templ BasePage(title string, enableDecorations bool) {
 							DnD Simulator
 						</a>
 						// Render either the Auth or profile buttons, depending on whether the user is logged in
-						<div hx-get="/sessions/validate" hx-swap="outerHTML" hx-trigger="load">Something went wrong...</div>
+						// TODO - Add a loading spinner while the session is being fetched
+						<div hx-get="/sessions/session_buttons" hx-swap="outerHTML" hx-trigger="load"></div>
 					</div>
 				</header>
 			}
@@ -85,9 +91,12 @@ templ AuthButtons() {
 	</div>
 }
 
-templ ProfileButtons(session *db.Session) {
+templ ProfileButtons(user *db.User) {
 	<div class="flex space-x-6">
-		<p class="align-baseline">Already logged in.</p>
+		<button class="flex flex-row items-center px-4 py-2 text-white transition duration-300 transform bg-green-500 rounded-md shadow hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 hover:-translate-y-1 hover:scale-105">
+			@common.UserIcon("white", 20.0)
+			<span class="ml-2">{ user.Username }</span>
+		</button>
 		<button
 			hx-delete="/sessions"
 			class="px-4 py-2 text-white transition duration-300 transform bg-blue-500 rounded-md shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 hover:-translate-y-1 hover:scale-105"

@@ -31,15 +31,25 @@ func createSessionsTable() error {
 	return err
 }
 
-func CreateSession(userId int) (string, error) {
-	sessionId, _ := generateSessionID()
+// Gets the session ID associated with the userId or creates one if none exists.
+func GetSessionID(userId int) (string, error) {
+	query := `SELECT id FROM sessions WHERE user_id = ?;`
+	row := DB.QueryRow(query, userId)
 
-	query := `INSERT INTO sessions (id, user_id, created_at, expires_at) VALUES (?, ?, ?, ?);`
-	_, err := DB.Exec(query, sessionId, userId, time.Now(), time.Now().Add(time.Hour*24))
-	if err != nil {
-		return "", err
+	var id string
+	err := row.Scan(&id)
+	if err != nil { // No session, create new
+		sessionID, _ := generateSessionID()
+
+		query := `INSERT INTO sessions (id, user_id, created_at, expires_at) VALUES (?, ?, ?, ?);`
+		_, err := DB.Exec(query, sessionID, userId, time.Now(), time.Now().Add(time.Hour*24))
+		if err != nil {
+			return "", err
+		}
+		return sessionID, nil
 	}
-	return sessionId, nil
+
+	return id, nil
 }
 
 func GetSessionByID(id string) (*Session, error) {

@@ -4,6 +4,7 @@ import (
 	"DnDSim/db"
 	"DnDSim/views"
 	"database/sql"
+	"log"
 	"net/http"
 	"time"
 
@@ -14,7 +15,7 @@ func RegisterSessionRoutes(g *echo.Group) {
 	g.POST("", handleSessionPost)
 	g.DELETE("", handleSessionDelete)
 	g.POST("/check", handleCheck)
-	g.GET("/validate", validateSession)
+	g.GET("/session_buttons", getSessionButtons)
 }
 
 func handleSessionPost(c echo.Context) error {
@@ -33,12 +34,7 @@ func handleSessionPost(c echo.Context) error {
 		return c.HTML(http.StatusUnauthorized, "Invalid username or password.")
 	}
 
-	if db.SessionExists(user.ID) {
-		c.Response().Header().Add("HX-Redirect", "/")
-		return c.HTML(http.StatusSeeOther, "")
-	}
-
-	id, err := db.CreateSession(user.ID)
+	id, err := db.GetSessionID(user.ID)
 	if err != nil {
 		return c.HTML(http.StatusInternalServerError, "Internal Server Error")
 	}
@@ -88,15 +84,24 @@ func handleCheck(c echo.Context) error {
 	return c.String(http.StatusOK, "")
 }
 
-func validateSession(c echo.Context) error {
+// This function returns a set of buttons depending on who is logged in.
+func getSessionButtons(c echo.Context) error {
 	cookie, err := c.Cookie("session")
 	if err != nil {
+		log.Println("No session token, return login and register button")
 		return RenderTempl(c, 200, views.AuthButtons())
 	}
-	session, err := db.GetSessionByID(cookie.Value);
+	session, err := db.GetSessionByID(cookie.Value)
 	if err != nil {
+		log.Println("Session ID invalid, return login and register buttons")
 		return RenderTempl(c, 200, views.AuthButtons())
 	}
 
-	return RenderTempl(c, 200, views.ProfileButtons(session))
+	log.Println("Session valid")
+	user, err := db.GetUserByID(session.UserID)
+	if err != nil {
+		log.Println("Error getting user by ID: " + err.Error())
+		return RenderTempl(c, 200, views.AuthButtons())
+	}
+	return RenderTempl(c, 200, views.ProfileButtons(user))
 }
