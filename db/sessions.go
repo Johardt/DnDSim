@@ -7,6 +7,7 @@ import (
 )
 
 // TODO Implement maintenance routine to delete expired sessions
+// TODO Invalidate session tokens on logout and rotate them every 30 minutes
 
 type Session struct {
 	ID        string
