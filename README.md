@@ -17,3 +17,27 @@ to start the service.
 
 ### Technology
 This project mainly exists to see how far I can get with a tech stack consisting of Go, Templ, HTMX, and some TailwindCSS for styling and SQLite for persistence.
+
+### Generating a Self-Signed Certificate for Local Development
+
+To generate a self-signed certificate for local development, you can follow these steps:
+
+* Open a terminal or command prompt.
+* Run the following command to generate a self-signed certificate and private key:
+  ```
+  openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+  ```
+* Follow the prompts to enter information for the certificate. You can leave the fields blank or fill them with dummy data for local development.
+* The command will generate two files: `key.pem` (private key) and `cert.pem` (certificate).
+
+You can then use these files in your application to enable HTTPS.
+
+### Running the Server with HTTPS
+
+To run the server with HTTPS, you need to provide the paths to the TLS certificate and key files. You can do this by using the `-cert` and `-key` flags when starting the server. For example:
+
+```sh
+go run main.go -cert=cert.pem -key=key.pem
+```
+
+This will start the server with HTTPS enabled, using the specified certificate and key files.

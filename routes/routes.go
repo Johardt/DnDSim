@@ -31,4 +31,7 @@ func RegisterRoutes(e *echo.Echo) {
 	handlers.RegisterSessionRoutes(e.Group("/sessions"))
 
 	// http.Handle("/play", middleware.Auth(templ.Handler(views.GameSelector())))
+
+	// Middleware to redirect HTTP requests to HTTPS
+	e.Pre(middleware.HTTPSRedirect())
 }
