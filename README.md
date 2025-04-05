@@ -14,6 +14,14 @@ This project uses [air](https://github.com/air-verse/air) and [templ](https://gi
 air
 ```
 to start the service.
+For that to work as intended, install both
+```sh
+go install github.com/air-verse/air@latest
+```
+and 
+```sh
+go install github.com/a-h/templ/cmd/templ@latest
+```
 
 ### Technology
 This project mainly exists to see how far I can get with a tech stack consisting of Go, Templ, HTMX, and some TailwindCSS for styling and SQLite for persistence.
